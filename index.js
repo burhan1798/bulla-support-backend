@@ -1,32 +1,33 @@
-const express = require("express");
-const cors = require("cors");
-const { Configuration, OpenAIApi } = require("openai");
+import express from 'express';
+import cors from 'cors';
+import 'dotenv/config.js';
+import { OpenAI } from 'openai';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ⛔ এখানে তোমার OpenAI API key বসাও
-const openai = new OpenAIApi(new Configuration({
-  apiKey: "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"
-}));
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
+app.post('/chat', async (req, res) => {
+  const userMessage = req.body.message;
 
   try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: message }],
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: userMessage }],
     });
 
-    const reply = completion.data.choices[0].message.content;
+    const reply = response.choices[0].message.content;
     res.json({ reply });
-
-  } catch (error) {
-    console.error(error.response?.data || error.message);
-    res.status(500).json({ error: "OpenAI API Error" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ reply: "❌ Something went wrong!" });
   }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
