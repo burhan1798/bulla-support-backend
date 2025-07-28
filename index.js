@@ -10,7 +10,9 @@ app.use(express.json());
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
+app.get('/', (req, res) => {
+  res.send("✅ Server is working!");
+});
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
 
