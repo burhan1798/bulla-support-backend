@@ -14,6 +14,20 @@ app.get("/", (req, res) => {
   res.send("OTP Server Running");
 });
 
+app.post("/send-otp", async (req, res) => {
+  const { phone } = req.body;
+
+  try {
+    const verification = await client.verify.v2
+      .services(process.env.TWILIO_SERVICE_SID)
+      .verifications.create({ to: phone, channel: "sms" });
+
+    res.json({ success: true, sid: verification.sid });
+  } catch (error) {
+    console.error("OTP error:", error.message);
+    res.json({ success: false, error: error.message });
+  }
+});
 // Twilio OTP route gulo ekhane thakbe...
 
 app.listen(PORT, () => {
