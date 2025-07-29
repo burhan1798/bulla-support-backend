@@ -27,18 +27,17 @@ app.get('/chat', (req, res) => {
 // ✅ Chat route
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
-
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [{ role: 'user', content: userMessage }]
     });
 
     const reply = response.choices[0].message.content;
     res.json({ reply });
   } catch (err) {
-    console.error("❌ API Error:", err?.message || err);
-    res.status(500).json({ reply: "❌ Something went wrong!" });
+    console.error("❌ API Error:", err);
+    res.status(500).json({ reply: "❌ Sorry, something went wrong!" });
   }
 });
 
