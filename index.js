@@ -20,8 +20,8 @@ const openai = new OpenAI({
 });
 
 // ✅ Health Check Route
-app.get('/', (req, res) => {
-  res.send("✅ Server is working!");
+app.get('/chat', (req, res) => {
+  res.send("🔁 This endpoint only accepts POST requests for chat.");
 });
 
 // ✅ Chat route
