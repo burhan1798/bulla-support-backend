@@ -3,6 +3,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 dotenv.config();
+const twilio = require("twilio");
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 const app = express();
 app.use(cors());
