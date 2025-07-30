@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send-otp", async (req, res) => {
-  const { phone } = req.body;
+  const { name, username, phone, password } = req.body;
 
   try {
     const verification = await client.verify.v2
