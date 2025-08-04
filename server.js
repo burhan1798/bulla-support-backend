@@ -1,5 +1,4 @@
 import express from "express";
-import express from "express";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
 import admin from "firebase-admin";
