@@ -1,16 +1,16 @@
 import express from "express";
+import express from "express";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
 import admin from "firebase-admin";
-import fs from "fs";
 import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-// 🔹 Load Firebase service account JSON (CommonJS compatible)
-const serviceAccount = JSON.parse(fs.readFileSync("./service-account-key.json", "utf8"));
+// 🔹 Firebase service account JSON parse from environment
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
