@@ -2,14 +2,15 @@ import express from "express";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
 import admin from "firebase-admin";
+import fs from "fs";
 import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-// 🔹 Firebase Admin SDK Setup
-import serviceAccount from "./service-account-key.json" assert { type: "json" };
+// 🔹 Load Firebase service account JSON (CommonJS compatible)
+const serviceAccount = JSON.parse(fs.readFileSync("./service-account-key.json", "utf8"));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -49,7 +50,7 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
     sendMessage(chatId, msg || "No users found.");
   }
 
-  // 2️⃣ Pending Orders List
+  // 2️⃣ Pending Orders
   else if(cmd === "/orders"){
     const snapshot = await db.ref("topupRequests").once("value");
     let msg = "📦 Pending Orders:\n\n";
