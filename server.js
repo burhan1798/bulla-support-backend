@@ -34,7 +34,9 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
 
   const chatId = message.chat.id;
   const text = message.text.trim();
-  const [cmd, param] = text.split(" ");
+  const parts = text.split(" ");
+  const cmd = parts[0];
+  const param = parts[1];
 
   if(cmd === "/registered"){
     const snapshot = await db.ref("users").once("value");
@@ -81,7 +83,6 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
 
   res.sendStatus(200);
 });
-
 // 🔹 Root Test
 app.get("/", (req,res)=>res.send("🚀 Telegram Firebase Bot Running (Plain Text Mode)"));
 
