@@ -80,17 +80,23 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
 
     // 4️⃣ Complete Order
     else if(cmd === "/complete"){
-      if(!param) return sendMessage(chatId, "⚠ Please provide Order ID");
-      await db.ref("topupRequests/"+param).update({ status: "Completed" });
-      sendMessage(chatId, `✅ Order ${param} marked as Completed`);
-    }
+  if(!param) return sendMessage(chatId, "⚠ Please provide Order ID");
 
-    // 5️⃣ Fail Order
-    else if(cmd === "/fail"){
-      if(!param) return sendMessage(chatId, "⚠ Please provide Order ID");
-      await db.ref("topupRequests/"+param).update({ status: "Failed" });
-      sendMessage(chatId, `❌ Order ${param} marked as Failed`);
-    }
+  const orderRef = db.ref("topupRequests/"+param);
+  const snapshot = await orderRef.once("value");
+
+  if(!snapshot.exists()){
+    return sendMessage(chatId, "⚠ Order not found");
+  }
+
+  const order = snapshot.val();
+  order.status = "Completed";      // change status
+  order.updatedAt = new Date().toISOString(); // optional for tracking
+
+  await orderRef.set(order); // ✅ replace whole object so listener triggers
+
+  sendMessage(chatId, `✅ Order ${param} marked as Completed`);
+}
 
     // 6️⃣ Unknown command
     else {
