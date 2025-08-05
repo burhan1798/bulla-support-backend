@@ -63,20 +63,20 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
 
     // 3️⃣ Pending Orders
     else if(cmd === "/orders"){
-      const snapshot = await db.ref("topupRequests").once("value");
-      let msg = "📦 Pending Orders:\n\n";
-      let found = false;
+  const snapshot = await db.ref("topupRequests").once("value");
+  let msg = "📦 Pending Orders:\n\n";
+  let found = false;
 
-      snapshot.forEach(child => {
-        const r = child.val();
-        if(r.status && r.status.toLowerCase() === "pending"){
-          found = true;
-          msg += `Order ID: (${child.key})\nUser: ${r.username}\nPackage: ${r.package}\nAmount: ৳${r.amount}\nMethod: ${r.method}\n-----------------------\n`;
-        }
-      });
-
-      sendMessage(chatId, found ? msg : "✅ No pending orders right now.");
+  snapshot.forEach(child => {
+    const r = child.val();
+    if(r.status && r.status.toLowerCase() === "pending"){ // ✅ Only pending
+      found = true;
+      msg += `Order ID: (${child.key})\nUser: ${r.username}\nPackage: ${r.package}\nAmount: ৳${r.amount}\nMethod: ${r.method}\n-----------------------\n`;
     }
+  });
+
+  sendMessage(chatId, found ? msg : "✅ No pending orders right now.");
+}
 
     // 4️⃣ Complete Order
     else if(cmd === "/complete"){
