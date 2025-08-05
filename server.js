@@ -7,6 +7,11 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.post(`/bot${TELEGRAM_TOKEN}`, (req, res, next) => {
+  console.log("🔹 Telegram Update:", JSON.stringify(req.body, null, 2));
+  next();
+});
+
 // 🔹 Firebase Admin Initialize from ENV
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
