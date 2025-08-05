@@ -18,12 +18,12 @@ const db = admin.database();
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-// 🔹 Helper: Send message to Telegram
+// 🔹 Helper: Send plain text to Telegram
 function sendMessage(chatId, text){
   fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "MarkdownV2" })
+    body: JSON.stringify({ chat_id: chatId, text }) // ✅ no markdown
   });
 }
 
@@ -36,74 +36,54 @@ app.post(`/bot${TELEGRAM_TOKEN}`, async (req, res) => {
   const text = message.text.trim();
   const [cmd, param] = text.split(" ");
 
-  // 1️⃣ Command list header
-  const commandList = `🤖 *Available Commands:*
-/registered → Show all users
-/orders → Show all pending orders
-/complete <OrderID> → Mark as Completed
-/fail <OrderID> → Mark as Failed
-
-`;
-
-  // 2️⃣ Registered Users
   if(cmd === "/registered"){
     const snapshot = await db.ref("users").once("value");
-    let msg = commandList + "👥 *Registered Users:*\n\n";
+    let msg = "👥 Registered Users:\n\n";
     let i = 1;
     snapshot.forEach(child => {
       const u = child.val();
-      msg += `${i++}\\. 👤 ${u.username || "N/A"} | 📱 ${u.phone || "N/A"}\n`;
+      msg += `${i++}. ${u.username || "N/A"} | ${u.phone || "N/A"}\n`;
     });
-    sendMessage(chatId, msg || commandList + "⚠ No users found.");
+    sendMessage(chatId, msg || "⚠ No users found.");
   }
 
-  // 3️⃣ Pending Orders
   else if(cmd === "/orders"){
     const snapshot = await db.ref("topupRequests").once("value");
+    let msg = "📦 Pending Orders:\n\n";
     let found = false;
-    let msg = commandList + "📦 *Pending Orders:*\n\n";
 
     snapshot.forEach(child => {
       const r = child.val();
       if(r.status && r.status.toLowerCase() === "pending"){
         found = true;
-        msg += `🆔 Order ID: (\`${child.key}\`)
-👤 User: ${r.username}
-💎 Package: ${r.package}
-💰 Amount: ৳${r.amount}
-📱 Method: ${r.method}
-━━━━━━━━━━━━━━━
-`;
+        msg += `Order ID: (${child.key})\nUser: ${r.username}\nPackage: ${r.package}\nAmount: ৳${r.amount}\nMethod: ${r.method}\n-----------------------\n`;
       }
     });
 
-    sendMessage(chatId, found ? msg : commandList + "✅ No pending orders right now.");
+    sendMessage(chatId, found ? msg : "✅ No pending orders right now.");
   }
 
-  // 4️⃣ Complete Order
   else if(cmd === "/complete"){
-    if(!param) return sendMessage(chatId, commandList + "⚠ Please provide Order ID");
+    if(!param) return sendMessage(chatId, "⚠ Please provide Order ID");
     await db.ref("topupRequests/"+param).update({ status: "Completed" });
-    sendMessage(chatId, `✅ Order \`${param}\` marked as *Completed*`);
+    sendMessage(chatId, `✅ Order ${param} marked as Completed`);
   }
 
-  // 5️⃣ Fail Order
   else if(cmd === "/fail"){
-    if(!param) return sendMessage(chatId, commandList + "⚠ Please provide Order ID");
+    if(!param) return sendMessage(chatId, "⚠ Please provide Order ID");
     await db.ref("topupRequests/"+param).update({ status: "Failed" });
-    sendMessage(chatId, `❌ Order \`${param}\` marked as *Failed*`);
+    sendMessage(chatId, `❌ Order ${param} marked as Failed`);
   }
 
-  // 6️⃣ Unknown command
   else {
-    sendMessage(chatId, commandList + "❓ Unknown command.");
+    sendMessage(chatId, "🤖 Available Commands:\n/registered\n/orders\n/complete <OrderID>\n/fail <OrderID>");
   }
 
   res.sendStatus(200);
 });
 
 // 🔹 Root Test
-app.get("/", (req,res)=>res.send("🚀 Telegram Firebase Bot Running Successfully"));
+app.get("/", (req,res)=>res.send("🚀 Telegram Firebase Bot Running (Plain Text Mode)"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=>console.log(`Bot server running on port ${PORT}`));
